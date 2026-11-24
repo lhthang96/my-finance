@@ -1,9 +1,8 @@
-// Placeholder entry: the UI agent replaces this file.
+// Entry point: mounts the app and registers the service worker (push-client owns the SW lifecycle).
 import { createRoot } from 'react-dom/client';
-
-function App() {
-  return <h1 style={{ fontWeight: 600 }}>My Finance</h1>;
-}
+import { App } from './App';
+import { registerServiceWorker } from './lib/push-client';
 
 const el = document.getElementById('root');
 if (el) createRoot(el).render(<App />);
+void registerServiceWorker();

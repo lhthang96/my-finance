@@ -163,6 +163,26 @@ const en = {
   notifMonthEnd: 'Month-end review — update stock prices and balances',
   notifMaturity: '{name} matures tomorrow ({amount})',
   notifTest: 'Test notification',
+  // b1 additions
+  comingSoon: 'Coming soon',
+  comingSoonBody: 'This screen is on its way.',
+  loginSubtitle: 'Personal financial independence tracker',
+  loginRemember: 'Remembered on this device for a year',
+  loadFailed: 'Could not load your data.',
+  retryLoad: 'Try again',
+  noFiDate: 'No FI date at the current saving rate',
+  fiReached: 'FI target reached',
+  next30: 'Next 30 days',
+  qaTypeHint: 'Or type an amount, e.g. 150k',
+  qaTypedInvalid: 'Could not read that amount',
+  qaRecentHint: 'Last used first',
+  toastSavedOffline: 'Saved on this device, will sync when online',
+  syncFailed: 'Sync failed, will retry',
+  statusOffline: 'Offline',
+  monthSpent: 'Spent this month',
+  kpiMonthlySaving: 'Saved per month',
+  dateToday: 'Today',
+  homeGreeting: 'Your financial independence at a glance',
 };
 
 export type TKey = keyof typeof en;
@@ -320,6 +340,26 @@ const vi: Record<TKey, string> = {
   notifMonthEnd: 'Tổng kết cuối tháng — cập nhật giá cổ phiếu và số dư',
   notifMaturity: '{name} đáo hạn ngày mai ({amount})',
   notifTest: 'Thông báo thử',
+  // b1 additions
+  comingSoon: 'Sắp ra mắt',
+  comingSoonBody: 'Màn hình này đang được hoàn thiện.',
+  loginSubtitle: 'Theo dõi tự do tài chính cá nhân',
+  loginRemember: 'Ghi nhớ trên thiết bị này trong một năm',
+  loadFailed: 'Không tải được dữ liệu của bạn.',
+  retryLoad: 'Thử lại',
+  noFiDate: 'Chưa có ngày đạt FI với mức tiết kiệm hiện tại',
+  fiReached: 'Đã đạt mục tiêu FI',
+  next30: '30 ngày tới',
+  qaTypeHint: 'Hoặc nhập số tiền, ví dụ 150k',
+  qaTypedInvalid: 'Không đọc được số tiền này',
+  qaRecentHint: 'Dùng gần đây nhất lên đầu',
+  toastSavedOffline: 'Đã lưu trên thiết bị, sẽ đồng bộ khi có mạng',
+  syncFailed: 'Đồng bộ lỗi, sẽ thử lại',
+  statusOffline: 'Ngoại tuyến',
+  monthSpent: 'Đã chi tháng này',
+  kpiMonthlySaving: 'Tiết kiệm mỗi tháng',
+  dateToday: 'Hôm nay',
+  homeGreeting: 'Tự do tài chính của bạn trong nhìn thoáng qua',
 };
 
 export const dict: Record<Locale, Record<TKey, string>> = { en, vi };
