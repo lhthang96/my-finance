@@ -3,7 +3,7 @@
 import { assetValue, computeSummary, monthSpendingActual } from '../shared/calc';
 import type { Asset, Settings, SpendingItem, Transaction } from '../shared/types';
 import { all, first, readSettings, run } from './db';
-import { dailyLogMessage, maturityMessage, monthEndMessage } from './reminders-messages';
+import { dailyLogMessage, groupedMaturityMessage, maturityMessage, monthEndMessage } from './reminders-messages';
 import { sendToAll } from './push';
 
 export interface CronOptions {
@@ -98,16 +98,17 @@ async function maturity(env: Env, s: Settings, p: Local, now: Date, opts: CronOp
     env.DB,
     "SELECT * FROM assets WHERE type = 'deposit' AND start_date IS NOT NULL AND term_months IS NOT NULL ORDER BY sort, id",
   );
-  for (const a of deposits) {
-    const matures = addMonths(a.start_date as string, a.term_months as number);
-    if (matures !== tomorrow) continue;
-    if (!(await claim(env, `maturity:${a.id}:${matures}`, now))) continue;
-    await sendToAll(
-      env,
-      { kind: 'maturity', ...maturityMessage(a.name, assetValue(a)) },
-      { now, fetchImpl: opts.fetchImpl },
-    );
-  }
+  const due = deposits.filter(
+    (a) => addMonths(a.start_date as string, a.term_months as number) === tomorrow,
+  );
+  if (due.length === 0) return;
+  // One notification per maturity date, however many deposits mature that day.
+  if (!(await claim(env, `maturity:${tomorrow}`, now))) return;
+  const message =
+    due.length === 1
+      ? maturityMessage(due[0].name, assetValue(due[0]))
+      : groupedMaturityMessage(due.length, due.reduce((sum, a) => sum + assetValue(a), 0), tomorrow);
+  await sendToAll(env, { kind: 'maturity', ...message }, { now, fetchImpl: opts.fetchImpl });
 }
 
 /** On local day 1 at hour 0, upserts the previous month's snapshot (same shape as POST /api/snapshots). */

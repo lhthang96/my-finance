@@ -22,11 +22,42 @@ export function pushSupported(): boolean {
   );
 }
 
-/** Registers the service worker at /sw.js. Failures are logged, not thrown, so the app still works. */
+const RELOAD_GUARD_KEY = 'mf-sw-reloaded-at';
+const RELOAD_GUARD_MS = 30_000;
+
+/** Reloads once when a new service worker takes control. The guard stops a reload loop. */
+function reloadOnControllerChange(hadController: boolean): void {
+  if (!hadController) return; // first install: nothing stale is on screen
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    try {
+      const last = Number(sessionStorage.getItem(RELOAD_GUARD_KEY) ?? '0');
+      if (Date.now() - last < RELOAD_GUARD_MS) return;
+      sessionStorage.setItem(RELOAD_GUARD_KEY, String(Date.now()));
+    } catch {
+      // Storage unavailable: reload anyway, the page only reloads on a real controller change.
+    }
+    window.location.reload();
+  });
+}
+
+/** Registers /sw.js. A waiting worker is activated at once (SKIP_WAITING), then the page reloads once. */
 export async function registerServiceWorker(): Promise<void> {
   if (!('serviceWorker' in navigator)) return;
   try {
-    await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    const hadController = navigator.serviceWorker.controller !== null;
+    const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    reloadOnControllerChange(hadController);
+
+    const activate = (worker: ServiceWorker | null) => {
+      if (worker && navigator.serviceWorker.controller) worker.postMessage({ type: 'SKIP_WAITING' });
+    };
+    if (reg.waiting) activate(reg.waiting);
+    reg.addEventListener('updatefound', () => {
+      const installing = reg.installing;
+      installing?.addEventListener('statechange', () => {
+        if (installing.state === 'installed') activate(installing);
+      });
+    });
   } catch (err) {
     console.warn('Service worker registration failed', err);
   }

@@ -187,9 +187,9 @@ function HomeContent({ state, locale }: { state: AppState; locale: Locale }) {
         ) : (
           <ul className="list">
             {upcoming.map((u) => (
-              <li className="row" key={u.id}>
+              <li className="row" key={u.maturity} data-testid={`upcoming-${u.maturity}`}>
                 <div className="row-main">
-                  <div className="row-title">{u.name}</div>
+                  <div className="row-title">{u.count === 1 ? u.name : t(locale, 'maturityGroup', { n: u.count })}</div>
                   <div className="muted small">{t(locale, 'maturesOn', { date: formatDate(u.maturity, locale) })}</div>
                 </div>
                 <div className="row-amt">{formatVND(u.amount, locale)}</div>
@@ -293,21 +293,28 @@ function buildSlices(
 }
 
 interface Maturity {
-  id: number;
-  name: string;
-  amount: number;
+  /** YYYY-MM-DD; deposits sharing this date are grouped into one row. */
   maturity: string;
+  name: string;
+  count: number;
+  amount: number;
 }
 
-/** Deposits whose maturity (start_date + term_months) falls within the next 30 days. */
+/** Deposits whose maturity (start_date + term_months) falls within the next 30 days, grouped by maturity date. */
 function upcomingMaturities(assets: Asset[], today: string): Maturity[] {
-  const out: Maturity[] = [];
+  const byDate = new Map<string, Maturity>();
   for (const a of assets) {
     if (a.type !== 'deposit' || !a.start_date || a.term_months == null) continue;
     const maturity = addMonthsISO(a.start_date, a.term_months);
     const days = diffDays(today, maturity);
-    if (days >= 0 && days <= 30) out.push({ id: a.id, name: a.name, amount: a.amount, maturity });
+    if (days < 0 || days > 30) continue;
+    const group = byDate.get(maturity);
+    if (group) {
+      group.count += 1;
+      group.amount += a.amount;
+    } else {
+      byDate.set(maturity, { maturity, name: a.name, count: 1, amount: a.amount });
+    }
   }
-  return out.sort((x, y) => x.maturity.localeCompare(y.maturity));
+  return [...byDate.values()].sort((x, y) => x.maturity.localeCompare(y.maturity));
 }
-

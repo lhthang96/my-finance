@@ -112,22 +112,29 @@ describe('daily log', () => {
 });
 
 describe('deposit maturity', () => {
-  it('at 09:00 local on 2026-12-13 announces deposits maturing on 2026-12-14, including Savings #2', async () => {
+  it('at 09:00 local on 2026-12-13 sends ONE grouped notice for the five deposits maturing on 2026-12-14', async () => {
     await runCron(env, local(2026, 12, 13, 9), { fetchImpl });
     const rows = notifications('maturity');
-    // Savings #2 to #6 all start 2026-11-14 with a 1-month term.
-    assert.equal(rows.length, 5);
-    const s2 = rows.find((r) => r.body_en.startsWith('Savings #2 '));
-    assert.ok(s2, 'Savings #2 notification missing');
-    assert.equal(s2.body_en, 'Savings #2 matures tomorrow (30,000,000 ₫)');
-    assert.equal(s2.body_vi, 'Savings #2 đáo hạn ngày mai (30.000.000 ₫)');
-    assert.equal(s2.title_en, 'Deposit matures tomorrow');
+    // Savings #2 to #6 all start 2026-11-14 with a 1-month term: one row, not five.
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].body_vi, '5 khoản tiết kiệm đáo hạn ngày 14/12 · 150.000.000 ₫');
+    assert.equal(rows[0].body_en, '5 savings deposits mature on 14/12 · 150,000,000 ₫');
+    assert.equal(rows[0].title_en, 'Deposits mature tomorrow');
+    assert.equal(pushCalls, 1);
+  });
+
+  it('a single deposit maturing on its own date keeps the named notice', async () => {
+    // Savings #1 starts 2026-11-13 with a 6-month term, so it matures 2027-05-13.
+    await runCron(env, local(2027, 5, 12, 9), { fetchImpl });
+    const [row] = notifications('maturity');
+    assert.equal(row.body_en, 'Savings #1 matures tomorrow (50,000,000 ₫)');
+    assert.equal(row.body_vi, 'Savings #1 đáo hạn ngày mai (50.000.000 ₫)');
   });
 
   it('does not repeat the maturity notice on a second run', async () => {
     await runCron(env, local(2026, 12, 13, 9), { fetchImpl });
     await runCron(env, local(2026, 12, 13, 9), { fetchImpl });
-    assert.equal(notifications('maturity').length, 5);
+    assert.equal(notifications('maturity').length, 1);
   });
 
   it('is silent on the day before the maturity window', async () => {

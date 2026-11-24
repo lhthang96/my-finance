@@ -8,7 +8,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { computeSummary } from '../../shared/calc';
 import { currentMonth } from '../../shared/format';
 import type { AppState, Locale, Transaction } from '../../shared/types';
-import { ApiError, api, isNetworkError, setUnauthorizedHandler } from './api';
+import { ApiError, api, setUnauthorizedHandler } from './api';
 import {
   cacheLocale,
   loadOutbox,
@@ -20,6 +20,8 @@ import {
   type OutboxItem,
   type TxBody,
 } from './outbox';
+import { useToast } from '../components/ui';
+import { t } from '../../shared/i18n';
 
 export type AuthStatus = 'loading' | 'login' | 'ready' | 'error';
 export type LocalTransaction = Transaction & { localId?: string };
@@ -83,6 +85,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [cachedLocale, setCachedLocale] = useState<Locale>(readCachedLocale);
   const [outbox, setOutbox] = useState<OutboxItem[]>(loadOutbox);
   const [online, setOnline] = useState<boolean>(() => (typeof navigator === 'undefined' ? true : navigator.onLine));
+  const toast = useToast();
 
   const baseRef = useRef<AppState | null>(null);
   const sentIds = useRef(new Map<string, number>());
@@ -137,10 +140,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             sentIds.current.delete(item.localId);
           }
         } catch (err) {
-          if (isNetworkError(err) || (err instanceof ApiError && err.status === 401)) break;
-          // The server rejected this entry for good: drop it so the queue cannot block forever.
+          // Network errors, 401 and 5xx keep the entry queued for the next attempt.
+          if (!(err instanceof ApiError) || err.status === 401 || err.status >= 500) break;
+          // A 4xx means the server refuses this entry for good: drop it so the queue cannot block, and say so.
           saveOutbox(loadOutbox().filter((i) => i.localId !== item.localId));
           setOutbox(loadOutbox());
+          const locale = baseRef.current?.settings.locale ?? readCachedLocale();
+          toast({ message: t(locale, 'syncRejected', { error: err.message }), duration: 6000 });
         }
       }
     } finally {
@@ -148,7 +154,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setOutbox(loadOutbox());
     }
     if (synced) await refresh();
-  }, [refresh]);
+  }, [refresh, toast]);
 
   const boot = useCallback(async () => {
     setStatus('loading');

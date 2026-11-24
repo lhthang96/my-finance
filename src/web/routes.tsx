@@ -1,12 +1,13 @@
-// Route table. Each entry maps a hash path to a page component.
-//
-// To register a real page (B2): create src/web/pages/<Name>.tsx exporting a component, import it here and
-// replace the ComingSoon placeholder in that entry's `component`. Set `tab: true` for bottom-bar / sidebar
-// entries; `tab: false` pages (like History) are reached by link and show a back button.
+// Route table. Each entry maps a hash path to its page component. `tab: true` entries appear in the bottom bar and sidebar;
+// `tab: false` pages (History) are reached by link and show a back button.
 import type { ComponentType } from 'react';
 import type { TKey } from '../shared/i18n';
 import { HomePage } from './pages/Home';
-import { ComingSoon } from './pages/ComingSoon';
+import { SpendPage } from './pages/Spend';
+import { PlanPage } from './pages/Plan';
+import { AssetsPage } from './pages/Assets';
+import { SettingsPage } from './pages/Settings';
+import { HistoryPage } from './pages/History';
 import { useHashPath } from './lib/router';
 import type { IconName } from './components/icons';
 
@@ -26,35 +27,35 @@ export const ROUTES: RouteDef[] = [
     titleKey: 'navSpend',
     icon: 'receipt',
     tab: true,
-    component: () => <ComingSoon titleKey="spendTitle" />,
+    component: SpendPage,
   },
   {
     path: '/plan',
     titleKey: 'navPlan',
     icon: 'plan',
     tab: true,
-    component: () => <ComingSoon titleKey="planTitle" />,
+    component: PlanPage,
   },
   {
     path: '/assets',
     titleKey: 'navAssets',
     icon: 'assets',
     tab: true,
-    component: () => <ComingSoon titleKey="assetsTitle" />,
+    component: AssetsPage,
   },
   {
     path: '/settings',
     titleKey: 'navSettings',
     icon: 'settings',
     tab: true,
-    component: () => <ComingSoon titleKey="settingsTitle" />,
+    component: SettingsPage,
   },
   {
     path: '/history',
     titleKey: 'viewHistory',
     icon: null,
     tab: false,
-    component: () => <ComingSoon titleKey="viewHistory" back />,
+    component: HistoryPage,
   },
 ];
 

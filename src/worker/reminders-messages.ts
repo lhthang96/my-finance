@@ -40,6 +40,18 @@ export function maturityMessage(name: string, amount: number): NotificationText 
   };
 }
 
+/** One notice for several deposits that mature on the same date. `matures` is YYYY-MM-DD. */
+export function groupedMaturityMessage(count: number, total: number, matures: string): NotificationText {
+  const day = `${matures.slice(8, 10)}/${matures.slice(5, 7)}`;
+  return {
+    title_en: 'Deposits mature tomorrow',
+    body_en: `${count} savings deposits mature on ${day} · ${formatVND(total, 'en')}`,
+    title_vi: 'Tiền gửi đáo hạn ngày mai',
+    body_vi: `${count} khoản tiết kiệm đáo hạn ngày ${day} · ${formatVND(total, 'vi')}`,
+    url: '/assets',
+  };
+}
+
 export function testMessage(): NotificationText {
   return {
     title_en: 'My Finance',
