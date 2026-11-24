@@ -1,0 +1,25 @@
+{
+  "name": "my-finance",
+  "main": "dist/worker.js",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "dist/public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "my-finance",
+      "database_id": "REPLACE_WITH_D1_ID",
+      "migrations_dir": "db/migrations"
+    }
+  ],
+  "triggers": {
+    "crons": ["0 * * * *"]
+  },
+  "vars": {
+    "VAPID_SUBJECT": "mailto:REPLACE_WITH_EMAIL"
+  }
+}
