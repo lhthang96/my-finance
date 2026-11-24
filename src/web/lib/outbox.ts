@@ -96,3 +96,12 @@ export function cacheLocale(locale: Locale): void {
     // ignore
   }
 }
+
+/** Short reason for a server refusal. Server text looks like "amount: Number must be ..." (zod); only the field name is used. */
+export function rejectionReason(serverError: string): 'reasonAmount' | 'reasonDate' | 'reasonCategory' | 'reasonOther' {
+  const field = serverError.split(':')[0]?.trim().toLowerCase() ?? '';
+  if (field === 'amount') return 'reasonAmount';
+  if (field === 'date') return 'reasonDate';
+  if (field.startsWith('category')) return 'reasonCategory';
+  return 'reasonOther';
+}

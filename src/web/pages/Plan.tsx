@@ -299,34 +299,37 @@ function PlanEditor({ state, locale, onSaved }: { state: AppState; locale: Local
                 data-testid="item-name"
                 onChange={(e) => patchItem(item.key, { name: e.target.value })}
               />
-              <AmountField
-                value={item.amount}
-                locale={locale}
-                label={t(locale, 'itemAmount')}
-                testId="item-amount"
-                onChange={(n) => patchItem(item.key, { amount: n })}
-              />
-              <div className="seg seg-sm" role="group" aria-label={t(locale, 'period')}>
-                <button
-                  type="button"
-                  aria-pressed={item.period === 'month'}
-                  className={cls(item.period === 'month' && 'is-active')}
-                  onClick={() => patchItem(item.key, { period: 'month' })}
-                >
-                  {t(locale, 'monthLabel')}
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={item.period === 'year'}
-                  className={cls(item.period === 'year' && 'is-active')}
-                  onClick={() => patchItem(item.key, { period: 'year' })}
-                >
-                  {t(locale, 'yearLabel')}
+              <div className="item-meta">
+                <AmountField
+                  className="item-amount"
+                  value={item.amount}
+                  locale={locale}
+                  label={t(locale, 'itemAmount')}
+                  testId="item-amount"
+                  onChange={(n) => patchItem(item.key, { amount: n })}
+                />
+                <div className="seg seg-sm" role="group" aria-label={t(locale, 'period')}>
+                  <button
+                    type="button"
+                    aria-pressed={item.period === 'month'}
+                    className={cls(item.period === 'month' && 'is-active')}
+                    onClick={() => patchItem(item.key, { period: 'month' })}
+                  >
+                    {t(locale, 'monthLabel')}
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={item.period === 'year'}
+                    className={cls(item.period === 'year' && 'is-active')}
+                    onClick={() => patchItem(item.key, { period: 'year' })}
+                  >
+                    {t(locale, 'yearLabel')}
+                  </button>
+                </div>
+                <button type="button" className="icon-btn" aria-label={t(locale, 'removeItem')} onClick={() => removeItem(item.key)}>
+                  <Icon name="close" size={18} />
                 </button>
               </div>
-              <button type="button" className="icon-btn" aria-label={t(locale, 'removeItem')} onClick={() => removeItem(item.key)}>
-                <Icon name="close" size={18} />
-              </button>
             </div>
           ))}
         </div>

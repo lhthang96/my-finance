@@ -321,7 +321,7 @@ test('Outbox: a queued entry the server refuses is dropped with a toast', async 
   });
   await page.reload(); // the outbox is read at boot
   await page.getByTestId('fi-ring').waitFor();
-  await waitForText(page, 'Máy chủ từ chối khoản ghi');
+  await waitForText(page, 'Không lưu được khoản chi');
   await outboxEmpty(page);
   expectRejection = false;
 });

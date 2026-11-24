@@ -17,6 +17,7 @@ import {
   readCachedLocale,
   savePendingLocale,
   saveOutbox,
+  rejectionReason,
   type OutboxItem,
   type TxBody,
 } from './outbox';
@@ -146,7 +147,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           saveOutbox(loadOutbox().filter((i) => i.localId !== item.localId));
           setOutbox(loadOutbox());
           const locale = baseRef.current?.settings.locale ?? readCachedLocale();
-          toast({ message: t(locale, 'syncRejected', { error: err.message }), duration: 6000 });
+          toast({ message: t(locale, 'syncRejected', { reason: t(locale, rejectionReason(err.message)) }), tone: 'error' });
         }
       }
     } finally {

@@ -140,53 +140,84 @@ export function Sheet({
 
 // ---------- toast ----------
 
+export type ToastTone = 'info' | 'success' | 'error';
+
 export interface ToastOptions {
   message: string;
+  tone?: ToastTone;
   actionLabel?: string;
   onAction?: () => void;
+  /** Milliseconds. Default: error 6000, toast with an action (undo) 5000, info/success 3500. */
   duration?: number;
+}
+
+/** Auto-dismiss time for a toast. Explicit `duration` wins. */
+export function toastDuration(opts: ToastOptions): number {
+  if (opts.duration !== undefined) return opts.duration;
+  if (opts.actionLabel) return 5000;
+  return opts.tone === 'error' ? 6000 : 3500;
 }
 
 const ToastContext = createContext<(opts: ToastOptions) => void>(() => undefined);
 
+/** One toast at a time: a new one replaces the current one. Taps dismiss it, and so does navigating to another page. */
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<(ToastOptions & { id: number })[]>([]);
+  const [current, setCurrent] = useState<(ToastOptions & { id: number }) | null>(null);
   const nextId = useRef(0);
+  const timer = useRef<number | undefined>(undefined);
 
-  const dismiss = useCallback((id: number) => {
-    setItems((list) => list.filter((i) => i.id !== id));
+  const dismiss = useCallback(() => {
+    window.clearTimeout(timer.current);
+    timer.current = undefined;
+    setCurrent(null);
   }, []);
 
-  const show = useCallback(
-    (opts: ToastOptions) => {
-      const id = ++nextId.current;
-      setItems((list) => [...list.slice(-2), { ...opts, id }]);
-      window.setTimeout(() => dismiss(id), opts.duration ?? 2600);
-    },
-    [dismiss],
-  );
+  const show = useCallback((opts: ToastOptions) => {
+    const id = ++nextId.current;
+    window.clearTimeout(timer.current);
+    setCurrent({ ...opts, id });
+    timer.current = window.setTimeout(() => {
+      timer.current = undefined;
+      setCurrent((c) => (c?.id === id ? null : c));
+    }, toastDuration(opts));
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('hashchange', dismiss);
+    return () => {
+      window.removeEventListener('hashchange', dismiss);
+      window.clearTimeout(timer.current);
+    };
+  }, [dismiss]);
 
   return (
     <ToastContext.Provider value={show}>
       {children}
       <div className="toast-stack" role="status" aria-live="polite">
-        {items.map((i) => (
-          <div className="toast" key={i.id} data-testid="toast">
-            <span className="toast-msg">{i.message}</span>
-            {i.actionLabel && (
+        {current && (
+          <div
+            className={cls('toast', `is-${current.tone ?? 'info'}`)}
+            key={current.id}
+            data-testid="toast"
+            onClick={dismiss}
+            title={current.actionLabel ? undefined : 'Dismiss'}
+          >
+            <span className="toast-msg">{current.message}</span>
+            {current.actionLabel && (
               <button
                 type="button"
                 className="toast-action"
-                onClick={() => {
-                  i.onAction?.();
-                  dismiss(i.id);
+                onClick={(e) => {
+                  e.stopPropagation();
+                  current.onAction?.();
+                  dismiss();
                 }}
               >
-                {i.actionLabel}
+                {current.actionLabel}
               </button>
             )}
           </div>
-        ))}
+        )}
       </div>
     </ToastContext.Provider>
   );

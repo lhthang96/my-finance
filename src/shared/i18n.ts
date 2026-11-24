@@ -234,7 +234,11 @@ const en = {
   historyChart: 'Net worth and FI assets',
   historyList: 'Monthly values',
   maturityGroup: '{n} deposits mature',
-  syncRejected: 'Entry rejected by the server and removed: {error}',
+  syncRejected: "Couldn't save an entry: {reason}",
+  reasonAmount: 'invalid amount',
+  reasonDate: 'invalid date',
+  reasonCategory: 'unknown category',
+  reasonOther: 'the server refused it',
   assumptions: 'Assumptions',
 };
 
@@ -463,7 +467,11 @@ const vi: Record<TKey, string> = {
   historyChart: 'Tài sản ròng và tài sản FI',
   historyList: 'Giá trị theo tháng',
   maturityGroup: '{n} khoản tiền gửi đáo hạn',
-  syncRejected: 'Máy chủ từ chối khoản ghi và đã xoá: {error}',
+  syncRejected: 'Không lưu được khoản chi: {reason}',
+  reasonAmount: 'số tiền không hợp lệ',
+  reasonDate: 'ngày không hợp lệ',
+  reasonCategory: 'danh mục không hợp lệ',
+  reasonOther: 'máy chủ từ chối',
   assumptions: 'Giả định',
 };
 

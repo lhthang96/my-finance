@@ -131,7 +131,8 @@ a {
 }
 
 .main {
-  padding: calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 120px);
+  /* Clears the tab bar, the FAB (14px above the bar, 60px tall) and a 16px gap. */
+  padding: calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + var(--tabbar-h) + 90px);
 }
 
 .page-stack {
@@ -347,7 +348,8 @@ a {
   }
 
   .main {
-    padding: 34px 40px 60px;
+    /* FAB sits 32px from the bottom and is 60px tall: keep the last row clear of it. */
+    padding: 34px 40px 110px;
   }
 
   .fab {
@@ -1506,6 +1508,11 @@ a {
   box-shadow: 0 0 10px rgba(52, 211, 153, 0.8);
 }
 
+.toast.is-error .toast-msg::before {
+  background: #f87171;
+  box-shadow: 0 0 10px rgba(248, 113, 113, 0.8);
+}
+
 .toast-action {
   border: 0;
   background: transparent;
@@ -1880,6 +1887,10 @@ a {
   gap: 12px;
 }
 
+.out-grid > .out-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
 .out-card {
   padding: 14px 15px;
   display: flex;
@@ -1920,10 +1931,10 @@ a {
 }
 
 .item-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto auto;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  align-items: center;
+  min-width: 0;
   padding: 10px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.03);
@@ -1931,13 +1942,33 @@ a {
 }
 
 .item-name {
+  width: 100%;
   min-width: 0;
   min-height: 40px;
 }
 
-.item-row .amount-input {
+.item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.item-meta .amount-input {
+  flex: 1 1 0;
+  min-width: 0;
   min-height: 40px;
+  padding-inline: 10px;
   font-size: 14px;
+}
+
+.item-meta .seg button {
+  padding: 0 9px;
+}
+
+.item-meta .seg,
+.item-meta .icon-btn {
+  flex: 0 0 auto;
 }
 
 .item-row .icon-btn {
@@ -2324,19 +2355,6 @@ a {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
-  .item-row {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-
-  .item-row .seg {
-    grid-column: 1 / 2;
-  }
-
-  .item-row .icon-btn {
-    grid-column: 2 / 3;
-    justify-self: end;
-  }
-
   .cat-form-row {
     grid-template-columns: 56px minmax(0, 1fr);
   }
@@ -2349,5 +2367,9 @@ a {
 @media (min-width: 900px) {
   .out-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .out-grid > .out-card:last-child:nth-child(odd) {
+    grid-column: auto;
   }
 }
